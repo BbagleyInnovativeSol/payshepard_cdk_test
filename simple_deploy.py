@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Simple deployment script that handles AWS profiles with temporary credentials
+Uses UV for fast virtual environment and dependency management
 """
 import boto3
 import subprocess
@@ -40,16 +41,23 @@ def deploy_with_profile(profile_name):
             
         print("✅ Credentials configured for CDK")
         
-        # Setup virtual environment
-        print("📦 Setting up environment...")
-        subprocess.run(['uv', 'sync'], check=True, capture_output=True)
+        # Setup virtual environment with UV
+        print("📦 Setting up UV virtual environment...")
         
-        # Activate venv and deploy
-        venv_python = '.venv/bin/python'
-        venv_cdk = [venv_python, '-m', 'cdk']
+        # Create venv if it doesn't exist
+        if not os.path.exists('.venv'):
+            subprocess.run(['uv', 'venv'], check=True, capture_output=True)
+            print("✅ Virtual environment created")
+        
+        # Install dependencies with UV
+        subprocess.run(['uv', 'sync'], check=True, capture_output=True)
+        print("✅ Dependencies installed with UV")
+        
+        # Use UV to run commands in the virtual environment
+        uv_run = ['uv', 'run']
         
         print("🔍 Testing CDK synthesis...")
-        result = subprocess.run(venv_cdk + ['synth'], 
+        result = subprocess.run(uv_run + ['cdk', 'synth'], 
                               capture_output=True, text=True, env=os.environ)
         
         if result.returncode != 0:
@@ -59,7 +67,7 @@ def deploy_with_profile(profile_name):
         print("✅ CDK synthesis successful")
         
         print("🚀 Deploying stack...")
-        result = subprocess.run(venv_cdk + ['deploy', '--require-approval', 'never'], 
+        result = subprocess.run(uv_run + ['cdk', 'deploy', '--require-approval', 'never'], 
                               env=os.environ)
         
         if result.returncode == 0:
