@@ -29,7 +29,7 @@ class PayShepardStack(Stack):
         self.create_outputs()
 
     def create_s3_tables_and_buckets(self):
-        """Create S3 Tables for data storage and SPICE datasets"""
+        """Create S3 Tables for data storage and internal ETL processing"""
         
         # Create S3 Tables bucket (underlying storage for tables)
         self.data_bucket = s3.Bucket(
@@ -53,10 +53,10 @@ class PayShepardStack(Stack):
             table_bucket_name=f"payshepard-client-data-{self.account}-{self.region}"
         )
 
-        # SPICE data bucket for QuickSight
+        # Internal data ETL bucket for Athena and data processing
         self.spice_bucket = s3.Bucket(
-            self, "SpiceBucket",
-            bucket_name=f"payshepard-spice-{self.account}-{self.region}",
+            self, "InternalDataEtlBucket",
+            bucket_name=f"payshepard-internal-data-etl-{self.account}-{self.region}",
             versioned=True,
             encryption=s3.BucketEncryption.S3_MANAGED,
             block_public_access=s3.BlockPublicAccess.BLOCK_ALL,
@@ -236,10 +236,10 @@ class PayShepardStack(Stack):
                  description="S3 Tables bucket for client data",
                  export_name="PayShepard-ClientDataBucket")
         
-        CfnOutput(self, "SpiceBucketName", 
+        CfnOutput(self, "InternalDataEtlBucketName", 
                  value=self.spice_bucket.bucket_name,
-                 description="S3 bucket for SPICE datasets",
-                 export_name="PayShepard-SpiceBucket")
+                 description="S3 bucket for internal data ETL and processing",
+                 export_name="PayShepard-InternalDataEtlBucket")
         
         CfnOutput(self, "QuickSightRoleArn",
                  value=self.quicksight_role.role_arn,

@@ -11,11 +11,10 @@ env = cdk.Environment(
     region=os.getenv('CDK_DEFAULT_REGION', 'us-east-1')
 )
 
-# External account configuration for cross-account Glue access
+# External account configuration for cross-account Glue access (optional)
 external_account_id = app.node.try_get_context("external_account_id")
 if not external_account_id:
-    print("WARNING: external_account_id not provided in context.")
-    print("Set with: cdk deploy --context external_account_id=123456789012")
+    # This is optional - no warning needed for basic deployment
     external_account_id = ""
 
 # Create the main stack

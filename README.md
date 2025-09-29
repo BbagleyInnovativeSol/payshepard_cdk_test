@@ -28,7 +28,7 @@ A simplified AWS CDK project that deploys the essential services for QuickSight 
 - **S3 Tables**: 
   - Main tables namespace for structured data storage
   - Client data bucket for client-specific tables
-- **S3 Buckets**: SPICE dataset storage and data processing
+- **S3 Buckets**: Data processing and internal ETL operations
 - **IAM Roles**: Cross-account Glue access and QuickSight permissions with S3 Tables support
 - **QuickSight Data Sources**: Athena and S3 connections
 - **Cross-Account Setup**: Ready for external Glue catalog integration
@@ -157,7 +157,7 @@ After deployment, the stack provides:
 - `DataBucketName`: S3 bucket for processed data  
 - `TableBucketName`: S3 Tables namespace for structured data
 - `ClientDataBucketName`: S3 Tables bucket for client data
-- `SpiceBucketName`: S3 bucket for SPICE datasets
+- `InternalDataEtlBucketName`: S3 bucket for internal data ETL and processing
 - `QuickSightRoleArn`: IAM role for QuickSight with S3 Tables permissions
 - `GlueAccessRoleArn`: IAM role for cross-account Glue access with S3 Tables support
 - `AthenaDataSourceId`: QuickSight Athena data source
@@ -198,7 +198,7 @@ payshepard_cdk_test/
 ✅ **Minimal complexity** - Single stack deployment  
 ✅ **Cross-account ready** - IAM roles and policies configured  
 ✅ **QuickSight integration** - Data sources pre-configured  
-✅ **S3 optimization** - Lifecycle policies for cost savings  
+✅ **Internal ETL operations** - Dedicated bucket for data processing workflows  
 ✅ **Secure by default** - Proper encryption and access controls  
 
 ## UV Benefits
@@ -220,11 +220,14 @@ uv sync  # if using pyproject.toml
 # or
 uv pip install -r requirements.txt  # if using requirements.txt
 
-# CDK commands (in virtual environment with profile)
-AWS_PROFILE=your-profile cdk list
-AWS_PROFILE=your-profile cdk diff
-AWS_PROFILE=your-profile cdk synth
-AWS_PROFILE=your-profile cdk deploy
+# CDK commands (in virtual environment with profile and account info)
+export AWS_PROFILE=your-profile
+export CDK_DEFAULT_ACCOUNT=123456789012  # Your account ID
+export CDK_DEFAULT_REGION=us-east-1      # Your region
+cdk list
+cdk diff
+cdk synth
+cdk deploy
 
 # Check stack status
 aws cloudformation describe-stacks --stack-name PayShepardStack --profile your-profile

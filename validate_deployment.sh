@@ -116,7 +116,7 @@ echo -e "${YELLOW}./deploy.sh your-profile-name${NC}"
 
 echo -e "\n${BLUE}Stack Summary:${NC}"
 echo "• 2 S3 Tables buckets (main tables + client data)"
-echo "• 2 S3 buckets (data storage + SPICE datasets)" 
+echo "• 2 S3 buckets (data storage + internal data ETL)" 
 echo "• IAM roles for QuickSight and cross-account Glue access"
 echo "• QuickSight data sources (Athena + S3)"
 echo "• Full S3 Tables permissions for both QuickSight and Glue"

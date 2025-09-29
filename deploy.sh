@@ -81,24 +81,26 @@ fi
 echo -e "\n${BLUE}Activating virtual environment...${NC}"
 source .venv/bin/activate
 
+# Set CDK environment variables
+export CDK_DEFAULT_ACCOUNT=$ACCOUNT_ID
+export CDK_DEFAULT_REGION=$AWS_REGION
+export AWS_PROFILE=$PROFILE_NAME
+
 # Bootstrap CDK if needed (within virtual environment)
 echo -e "\n${BLUE}Bootstrapping CDK environment...${NC}"
-AWS_PROFILE=$PROFILE_NAME cdk bootstrap
+cdk bootstrap
 
 # Deploy stack (within virtual environment)
 echo -e "\n${BLUE}Deploying PayShepard stack...${NC}"
-# Use the profile and pass account info as context
-AWS_PROFILE=$PROFILE_NAME cdk deploy \
-    --context account_id=$ACCOUNT_ID \
-    --context region=$AWS_REGION \
-    --require-approval never
+# Deploy with proper environment variables set
+cdk deploy --require-approval never
 
 echo -e "\n${GREEN}Deployment completed successfully!${NC}"
 echo -e "\n${BLUE}Deployed Resources:${NC}"
 echo "✓ S3 Tables namespace for structured data"
 echo "✓ S3 Tables bucket for client data"
 echo "✓ S3 bucket for data storage"
-echo "✓ S3 bucket for SPICE datasets"
+echo "✓ S3 bucket for internal data ETL and processing"
 echo "✓ IAM roles for QuickSight and cross-account Glue access with S3 Tables support"
 echo "✓ QuickSight data sources (Athena and S3)"
 
@@ -112,6 +114,6 @@ echo "5. Create QuickSight datasets and analyses"
 echo -e "\n${BLUE}Useful Commands:${NC}"
 echo "- View stack outputs: aws cloudformation describe-stacks --stack-name PayShepardStack --profile $PROFILE_NAME"
 echo "- Access QuickSight: https://quicksight.aws.amazon.com/"
-echo "- CDK commands: source .venv/bin/activate && AWS_PROFILE=$PROFILE_NAME cdk <command>"
+echo "- CDK commands: source .venv/bin/activate && export AWS_PROFILE=$PROFILE_NAME CDK_DEFAULT_ACCOUNT=$ACCOUNT_ID CDK_DEFAULT_REGION=$AWS_REGION && cdk <command>"
 echo "- Account ID: $ACCOUNT_ID"
 echo "- Region: $AWS_REGION"
