@@ -49,7 +49,8 @@ echo -e "${BLUE}Validating AWS credentials and getting account info...${NC}"
 ACCOUNT_INFO=$(aws sts get-caller-identity --profile $PROFILE_NAME 2>/dev/null)
 if [ $? -ne 0 ]; then
     echo -e "${RED}AWS CLI not configured or no valid credentials found for profile: $PROFILE_NAME${NC}"
-    echo "Please run 'aws configure --profile $PROFILE_NAME' first"
+    echo -e "${YELLOW}If this profile requires MFA, use: python simple_deploy.py $PROFILE_NAME${NC}"
+    echo "Please configure the profile or get MFA session first"
     exit 1
 fi
 
@@ -81,18 +82,31 @@ fi
 echo -e "\n${BLUE}Activating virtual environment...${NC}"
 source .venv/bin/activate
 
+# Extract credentials from profile for CDK
+echo -e "\n${BLUE}Extracting credentials for CDK...${NC}"
+if python extract_profile_creds.py $PROFILE_NAME; then
+    echo -e "${GREEN}✓ Credentials extracted successfully${NC}"
+    # Unset AWS_PROFILE since we're using explicit credentials
+    unset AWS_PROFILE
+else
+    echo -e "${RED}Failed to extract credentials from profile${NC}"
+    exit 1
+fi
+
 # Set CDK environment variables
 export CDK_DEFAULT_ACCOUNT=$ACCOUNT_ID
 export CDK_DEFAULT_REGION=$AWS_REGION
-export AWS_PROFILE=$PROFILE_NAME
 
-# Bootstrap CDK if needed (within virtual environment)
-echo -e "\n${BLUE}Bootstrapping CDK environment...${NC}"
-cdk bootstrap
+echo -e "${GREEN}✓ CDK environment configured${NC}"
+
+# Check if our stack uses bootstrap resources (it doesn't for S3, IAM, QuickSight only)
+echo -e "\n${BLUE}Checking bootstrap requirements...${NC}"
+# Our stack only uses S3, IAM, and QuickSight - no bootstrap required
+echo "Stack uses only S3, IAM, and QuickSight resources - skipping bootstrap"
 
 # Deploy stack (within virtual environment)
 echo -e "\n${BLUE}Deploying PayShepard stack...${NC}"
-# Deploy with proper environment variables set
+# Deploy using extracted credentials (no profile needed)
 cdk deploy --require-approval never
 
 echo -e "\n${GREEN}Deployment completed successfully!${NC}"

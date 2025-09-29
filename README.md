@@ -62,16 +62,22 @@ This will test:
 
 ### Deploy
 
+**For standard profiles:**
 ```bash
 ./deploy.sh profile-name  # Replace with your AWS CLI profile name
 ```
 
+**For MFA/assume-role profiles:**
+```bash
+python simple_deploy.py profile-name  # More reliable with temporary credentials
+```
+
 The script will:
-- Check for UV and other prerequisites
+- Check for UV and other prerequisites  
 - Validate AWS credentials and extract account information
 - Create and activate a virtual environment using UV
 - Install dependencies with UV (faster than pip)
-- Bootstrap and deploy the CDK stack using the specified profile
+- Deploy the CDK stack using the specified profile (skips bootstrap to avoid ECR permissions)
 
 ## External Account Configuration
 
@@ -188,7 +194,8 @@ payshepard_cdk_test/
 ├── requirements.txt          # Python dependencies (legacy)
 ├── pyproject.toml           # Modern Python project config (UV)
 ├── cdk.json                 # CDK configuration  
-├── deploy.sh               # UV-based deployment script
+├── deploy.sh               # Main deployment script
+├── simple_deploy.py         # Alternative deployment for MFA/assume-role profiles
 ├── validate_deployment.sh   # Pre-deployment validation script
 └── README.md              # This file
 ```
