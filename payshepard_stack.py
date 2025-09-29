@@ -44,13 +44,13 @@ class PayShepardStack(Stack):
         # Create S3 Tables namespace for organizing tables
         self.table_namespace = s3tables.CfnTableBucket(
             self, "TableBucket",
-            name=f"payshepard-tables-{self.account}-{self.region}"
+            table_bucket_name=f"payshepard-tables-{self.account}-{self.region}"
         )
         
         # Create S3 Tables bucket for client data
         self.client_data_bucket = s3tables.CfnTableBucket(
             self, "ClientDataBucket",
-            name=f"payshepard-client-data-{self.account}-{self.region}"
+            table_bucket_name=f"payshepard-client-data-{self.account}-{self.region}"
         )
 
         # SPICE data bucket for QuickSight
@@ -104,8 +104,8 @@ class PayShepardStack(Stack):
                     "s3tables:ListTables"
                 ],
                 resources=[
-                    f"arn:aws:s3tables:{self.region}:{self.account}:bucket/{self.table_namespace.name}/*",
-                    f"arn:aws:s3tables:{self.region}:{self.account}:bucket/{self.client_data_bucket.name}/*"
+                    f"arn:aws:s3tables:{self.region}:{self.account}:bucket/payshepard-tables-{self.account}-{self.region}/*",
+                    f"arn:aws:s3tables:{self.region}:{self.account}:bucket/payshepard-client-data-{self.account}-{self.region}/*"
                 ]
             )
         )
@@ -162,8 +162,8 @@ class PayShepardStack(Stack):
                     "s3tables:ListTables"
                 ],
                 resources=[
-                    f"arn:aws:s3tables:{self.region}:{self.account}:bucket/{self.table_namespace.name}/*",
-                    f"arn:aws:s3tables:{self.region}:{self.account}:bucket/{self.client_data_bucket.name}/*"
+                    f"arn:aws:s3tables:{self.region}:{self.account}:bucket/payshepard-tables-{self.account}-{self.region}/*",
+                    f"arn:aws:s3tables:{self.region}:{self.account}:bucket/payshepard-client-data-{self.account}-{self.region}/*"
                 ]
             )
         )
@@ -227,12 +227,12 @@ class PayShepardStack(Stack):
                  export_name="PayShepard-DataBucket")
         
         CfnOutput(self, "TableBucketName",
-                 value=self.table_namespace.name,
+                 value=self.table_namespace.ref,
                  description="S3 Tables namespace for structured data",
                  export_name="PayShepard-TableBucket")
         
         CfnOutput(self, "ClientDataBucketName",
-                 value=self.client_data_bucket.name,
+                 value=self.client_data_bucket.ref,
                  description="S3 Tables bucket for client data",
                  export_name="PayShepard-ClientDataBucket")
         

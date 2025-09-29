@@ -37,17 +37,40 @@ A simplified AWS CDK project that deploys the essential services for QuickSight 
 
 ### Prerequisites
 
-- AWS CLI configured with appropriate credentials
-- AWS CDK CLI installed: `npm install -g aws-cdk`
-- Python 3.9+
-- QuickSight subscription in your AWS account
-- External account ID with Glue catalog access
+- **UV** installed: `curl -LsSf https://astral.sh/uv/install.sh | sh` (or `pip install uv`)
+- **AWS CLI** configured with appropriate credentials and profiles
+- **AWS CDK CLI** installed: `npm install -g aws-cdk`
+- **Python 3.9+**
+- **QuickSight subscription** in your AWS account
+- **External account ID** with Glue catalog access (optional)
+
+### Validate Setup
+
+Before deploying, validate your environment:
+
+```bash
+./validate_deployment.sh
+```
+
+This will test:
+- UV and CDK installations
+- Virtual environment setup
+- Dependency installation
+- Python imports
+- CDK synthesis
+- Stack resource validation
 
 ### Deploy
 
 ```bash
-./deploy.sh 123456789012  # Replace with your external account ID
+./deploy.sh profile-name  # Replace with your AWS CLI profile name
 ```
+
+The script will:
+- Check for UV and other prerequisites
+- Create and activate a virtual environment using UV
+- Install dependencies with UV (faster than pip)
+- Bootstrap and deploy the CDK stack
 
 ## External Account Configuration
 
@@ -161,9 +184,11 @@ cdk destroy
 payshepard_cdk_test/
 ├── app.py                    # Main CDK application
 ├── payshepard_stack.py       # Single stack with all resources
-├── requirements.txt          # Python dependencies
+├── requirements.txt          # Python dependencies (legacy)
+├── pyproject.toml           # Modern Python project config (UV)
 ├── cdk.json                 # CDK configuration  
-├── deploy.sh               # Simple deployment script
+├── deploy.sh               # UV-based deployment script
+├── validate_deployment.sh   # Pre-deployment validation script
 └── README.md              # This file
 ```
 
@@ -174,6 +199,35 @@ payshepard_cdk_test/
 ✅ **QuickSight integration** - Data sources pre-configured  
 ✅ **S3 optimization** - Lifecycle policies for cost savings  
 ✅ **Secure by default** - Proper encryption and access controls  
+
+## UV Benefits
+
+- **Faster installs**: 10-100x faster than pip  
+- **Better dependency resolution**: More reliable conflict resolution
+- **Virtual environment management**: Automatic venv creation and management
+- **Lock file support**: Reproducible installations with `uv.lock`
+- **Modern tooling**: Built in Rust for performance
+
+## Development Commands
+
+```bash
+# Activate virtual environment
+source .venv/bin/activate
+
+# Install dependencies with UV
+uv sync  # if using pyproject.toml
+# or
+uv pip install -r requirements.txt  # if using requirements.txt
+
+# CDK commands (in virtual environment)
+cdk list
+cdk diff
+cdk synth
+cdk deploy
+
+# Check stack status
+aws cloudformation describe-stacks --stack-name PayShepardStack --profile your-profile
+```
 
 ## Support
 

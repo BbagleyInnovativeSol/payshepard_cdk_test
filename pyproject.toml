@@ -1,0 +1,14 @@
+[project]
+name = "payshepard-cdk-test"
+version = "0.1.0"
+description = "PayShepard CDK - QuickSight with Cross-Account Glue"
+requires-python = ">=3.11"
+dependencies = [
+    "aws-cdk-lib>=2.100.0",
+    "constructs>=10.0.0",
+]
+
+[tool.uv]
+dev-dependencies = []
+
+# No build system needed for CDK projects - just dependency management
