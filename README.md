@@ -68,9 +68,10 @@ This will test:
 
 The script will:
 - Check for UV and other prerequisites
+- Validate AWS credentials and extract account information
 - Create and activate a virtual environment using UV
 - Install dependencies with UV (faster than pip)
-- Bootstrap and deploy the CDK stack
+- Bootstrap and deploy the CDK stack using the specified profile
 
 ## External Account Configuration
 
@@ -219,11 +220,11 @@ uv sync  # if using pyproject.toml
 # or
 uv pip install -r requirements.txt  # if using requirements.txt
 
-# CDK commands (in virtual environment)
-cdk list
-cdk diff
-cdk synth
-cdk deploy
+# CDK commands (in virtual environment with profile)
+AWS_PROFILE=your-profile cdk list
+AWS_PROFILE=your-profile cdk diff
+AWS_PROFILE=your-profile cdk synth
+AWS_PROFILE=your-profile cdk deploy
 
 # Check stack status
 aws cloudformation describe-stacks --stack-name PayShepardStack --profile your-profile

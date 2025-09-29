@@ -44,12 +44,22 @@ if ! command -v cdk &> /dev/null; then
     exit 1
 fi
 
-# Check if AWS CLI is configured
-if ! aws sts get-caller-identity --profile $1 &> /dev/null; then
-    echo -e "${RED}AWS CLI not configured or no valid credentials found${NC}"
-    echo "Please run 'aws configure' first"
+# Check if AWS CLI is configured and get account info
+echo -e "${BLUE}Validating AWS credentials and getting account info...${NC}"
+ACCOUNT_INFO=$(aws sts get-caller-identity --profile $PROFILE_NAME 2>/dev/null)
+if [ $? -ne 0 ]; then
+    echo -e "${RED}AWS CLI not configured or no valid credentials found for profile: $PROFILE_NAME${NC}"
+    echo "Please run 'aws configure --profile $PROFILE_NAME' first"
     exit 1
 fi
+
+# Extract account ID from the response
+ACCOUNT_ID=$(echo "$ACCOUNT_INFO" | grep -o '"Account": "[^"]*"' | cut -d'"' -f4)
+AWS_REGION=$(aws configure get region --profile $PROFILE_NAME || echo "us-east-1")
+
+echo -e "${GREEN}✓ AWS credentials validated${NC}"
+echo -e "${GREEN}✓ Account ID: ${ACCOUNT_ID}${NC}"
+echo -e "${GREEN}✓ Region: ${AWS_REGION}${NC}"
 
 echo -e "${GREEN}Prerequisites check passed!${NC}"
 
@@ -73,12 +83,15 @@ source .venv/bin/activate
 
 # Bootstrap CDK if needed (within virtual environment)
 echo -e "\n${BLUE}Bootstrapping CDK environment...${NC}"
-cdk bootstrap
+AWS_PROFILE=$PROFILE_NAME cdk bootstrap
 
 # Deploy stack (within virtual environment)
 echo -e "\n${BLUE}Deploying PayShepard stack...${NC}"
-# cdk deploy --context external_account_id=$EXTERNAL_ACCOUNT --require-approval never
-cdk deploy --context profile=$PROFILE_NAME --require-approval never
+# Use the profile and pass account info as context
+AWS_PROFILE=$PROFILE_NAME cdk deploy \
+    --context account_id=$ACCOUNT_ID \
+    --context region=$AWS_REGION \
+    --require-approval never
 
 echo -e "\n${GREEN}Deployment completed successfully!${NC}"
 echo -e "\n${BLUE}Deployed Resources:${NC}"
@@ -99,4 +112,6 @@ echo "5. Create QuickSight datasets and analyses"
 echo -e "\n${BLUE}Useful Commands:${NC}"
 echo "- View stack outputs: aws cloudformation describe-stacks --stack-name PayShepardStack --profile $PROFILE_NAME"
 echo "- Access QuickSight: https://quicksight.aws.amazon.com/"
-echo "- CDK commands: source .venv/bin/activate && cdk <command>"
+echo "- CDK commands: source .venv/bin/activate && AWS_PROFILE=$PROFILE_NAME cdk <command>"
+echo "- Account ID: $ACCOUNT_ID"
+echo "- Region: $AWS_REGION"
