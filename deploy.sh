@@ -23,6 +23,11 @@ fi
 PROFILE_NAME="$1"
 echo -e "${GREEN}Profile Name: ${PROFILE_NAME}${NC}"
 
+
+# aws configure
+# export CDK_DEFAULT_ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
+# export CDK_DEFAULT_REGION=us-east-1
+
 # EXTERNAL_ACCOUNT="$1"
 # echo -e "${GREEN}External Account ID: ${EXTERNAL_ACCOUNT}${NC}"
 

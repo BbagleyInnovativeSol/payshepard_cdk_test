@@ -24,7 +24,7 @@ class PayShepardS3Stack(Stack):
         self.athena_bucket = s3.Bucket(
             self,
             "AthenaBucket",
-            bucket_name="payshepard_athena",
+            bucket_name="payshepard-athena",
             removal_policy=RemovalPolicy.DESTROY,
             auto_delete_objects=True 
         )
@@ -37,8 +37,9 @@ class PayShepardS3Stack(Stack):
         #     removal_policy=RemovalPolicy.DESTROY if self.env_name != "prod" else RemovalPolicy.RETAIN,
         #     auto_delete_objects=True if self.env_name != "prod" else False
         # ) 
-    CfnOutput(self,
-              "create_s3_buckets",
-              value=self.create_s3_buckets,
-              description = "Created bucket"
-              )
+
+        CfnOutput(self,
+                  "create_s3_buckets",
+                  value=self.athena_bucket.bucket_arn,
+                  description = "Created bucket for athena"
+                  )

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
 import os
 import aws_cdk as cdk
 from s3_bucket_tables.s3_buckettable_stack import PayShepardS3Stack
@@ -14,5 +14,7 @@ aws_env = cdk.Environment(
 PayShepardS3Stack(
     app,
     "PayshepardStack",
-    description="Test Description"
+    description="PayShepard buckets for testing in acct"
 )
+
+app.synth()
