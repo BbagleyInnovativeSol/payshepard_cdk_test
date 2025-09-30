@@ -82,52 +82,66 @@ fi
 echo -e "\n${BLUE}Activating virtual environment...${NC}"
 source .venv/bin/activate
 
-# Extract credentials from profile for CDK
-echo -e "\n${BLUE}Extracting credentials for CDK...${NC}"
-if python extract_profile_creds.py $PROFILE_NAME; then
-    echo -e "${GREEN}✓ Credentials extracted successfully${NC}"
-    # Unset AWS_PROFILE since we're using explicit credentials
-    unset AWS_PROFILE
-else
-    echo -e "${RED}Failed to extract credentials from profile${NC}"
-    exit 1
-fi
 
-# Set CDK environment variables
-export CDK_DEFAULT_ACCOUNT=$ACCOUNT_ID
-export CDK_DEFAULT_REGION=$AWS_REGION
+# Create S3 Tables buckets first
+aws s3tables create-table-bucket --name payshepard_internal --region us-east-1
+aws s3tables create-table-bucket --name client_a --region us-east-1
 
-echo -e "${GREEN}✓ CDK environment configured${NC}"
+# Deploy
+cdk deploy
 
-# Check if our stack uses bootstrap resources (it doesn't for S3, IAM, QuickSight only)
-echo -e "\n${BLUE}Checking bootstrap requirements...${NC}"
-# Our stack only uses S3, IAM, and QuickSight - no bootstrap required
-echo "Stack uses only S3, IAM, and QuickSight resources - skipping bootstrap"
+# Create s3 buckets
 
-# Deploy stack (within virtual environment)
-echo -e "\n${BLUE}Deploying PayShepard stack...${NC}"
-# Deploy using extracted credentials (no profile needed)
-cdk deploy --require-approval never
 
-echo -e "\n${GREEN}Deployment completed successfully!${NC}"
-echo -e "\n${BLUE}Deployed Resources:${NC}"
-echo "✓ S3 Tables namespace for structured data"
-echo "✓ S3 Tables bucket for client data"
-echo "✓ S3 bucket for data storage"
-echo "✓ S3 bucket for internal data ETL and processing"
-echo "✓ IAM roles for QuickSight and cross-account Glue access with S3 Tables support"
-echo "✓ QuickSight data sources (Athena and S3)"
 
-echo -e "\n${BLUE}Next Steps:${NC}"
-echo "1. Configure QuickSight permissions in AWS Console"
-echo "2. Set up external account resource policies (see README)"
-echo "3. Create tables in the S3 Tables namespaces (main and client data)"
-echo "4. Create Glue jobs or use existing ones from external account"
-echo "5. Create QuickSight datasets and analyses"
 
-echo -e "\n${BLUE}Useful Commands:${NC}"
-echo "- View stack outputs: aws cloudformation describe-stacks --stack-name PayShepardStack --profile $PROFILE_NAME"
-echo "- Access QuickSight: https://quicksight.aws.amazon.com/"
-echo "- CDK commands: source .venv/bin/activate && export AWS_PROFILE=$PROFILE_NAME CDK_DEFAULT_ACCOUNT=$ACCOUNT_ID CDK_DEFAULT_REGION=$AWS_REGION && cdk <command>"
-echo "- Account ID: $ACCOUNT_ID"
-echo "- Region: $AWS_REGION"
+#
+# # Extract credentials from profile for CDK
+# echo -e "\n${BLUE}Extracting credentials for CDK...${NC}"
+# if python extract_profile_creds.py $PROFILE_NAME; then
+#     echo -e "${GREEN}✓ Credentials extracted successfully${NC}"
+#     # Unset AWS_PROFILE since we're using explicit credentials
+#     unset AWS_PROFILE
+# else
+#     echo -e "${RED}Failed to extract credentials from profile${NC}"
+#     exit 1
+# fi
+#
+# # Set CDK environment variables
+# export CDK_DEFAULT_ACCOUNT=$ACCOUNT_ID
+# export CDK_DEFAULT_REGION=$AWS_REGION
+#
+# echo -e "${GREEN}✓ CDK environment configured${NC}"
+#
+# # Check if our stack uses bootstrap resources (it doesn't for S3, IAM, QuickSight only)
+# echo -e "\n${BLUE}Checking bootstrap requirements...${NC}"
+# # Our stack only uses S3, IAM, and QuickSight - no bootstrap required
+# echo "Stack uses only S3, IAM, and QuickSight resources - skipping bootstrap"
+#
+# # Deploy stack (within virtual environment)
+# echo -e "\n${BLUE}Deploying PayShepard stack...${NC}"
+# # Deploy using extracted credentials (no profile needed)
+# cdk deploy --require-approval never
+#
+# echo -e "\n${GREEN}Deployment completed successfully!${NC}"
+# echo -e "\n${BLUE}Deployed Resources:${NC}"
+# echo "✓ S3 Tables namespace for structured data"
+# echo "✓ S3 Tables bucket for client data"
+# echo "✓ S3 bucket for data storage"
+# echo "✓ S3 bucket for internal data ETL and processing"
+# echo "✓ IAM roles for QuickSight and cross-account Glue access with S3 Tables support"
+# echo "✓ QuickSight data sources (Athena and S3)"
+#
+# echo -e "\n${BLUE}Next Steps:${NC}"
+# echo "1. Configure QuickSight permissions in AWS Console"
+# echo "2. Set up external account resource policies (see README)"
+# echo "3. Create tables in the S3 Tables namespaces (main and client data)"
+# echo "4. Create Glue jobs or use existing ones from external account"
+# echo "5. Create QuickSight datasets and analyses"
+#
+# echo -e "\n${BLUE}Useful Commands:${NC}"
+# echo "- View stack outputs: aws cloudformation describe-stacks --stack-name PayShepardStack --profile $PROFILE_NAME"
+# echo "- Access QuickSight: https://quicksight.aws.amazon.com/"
+# echo "- CDK commands: source .venv/bin/activate && export AWS_PROFILE=$PROFILE_NAME CDK_DEFAULT_ACCOUNT=$ACCOUNT_ID CDK_DEFAULT_REGION=$AWS_REGION && cdk <command>"
+# echo "- Account ID: $ACCOUNT_ID"
+# echo "- Region: $AWS_REGION"
